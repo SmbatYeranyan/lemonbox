@@ -1,6 +1,7 @@
 #include <SoftwareSerial.h>
 #include "Arduino.h"
 #include "esp8266.h"
+#include "string.h"
 
 
 esp8266::esp8266(SoftwareSerial U, Print &print)
@@ -36,14 +37,15 @@ void esp8266::availableData(){
 	if (Uart.available() > 0) {
 		inByte = Uart.read();
 		inChar = (char)inByte;
-		
+		memoryString = Uart.readString();
+		printer->println(memoryString);
 
         if (Uart.find("+IPD")){
 
-	        if (Uart.find(":POST")){
+	        if(strstr(":POST",memoryString)){
 	        	printer->println("POST WAS FOUND:");
 	        }
-        	if(Uart.find(":GET")){
+        	if(strstr(":GET",memoryString)){
 	        	printer->println("GET WAS FOUND:");
 	        	String connection = (Uart.readString().substring(1,2));
 	        	printer->println(connection);
