@@ -12,7 +12,8 @@ class esp8266
     void init();
     void check();
     void availableData();
-    void accessPoint();
+    void accessPoint(String name);
+    void uartSend(String data);
     void sendData(String data, String client);
     void multipleConnections();
     void tcpServer();

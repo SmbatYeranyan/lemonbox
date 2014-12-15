@@ -15,30 +15,22 @@ void esp8266::init(){
 }
 
 void esp8266::check(){
-    Uart.print("AT");
-    Uart.print("\r");
-    Uart.print("\n");
-    printer->println("Sent At");
+    uartSend("AT");
 }
 
 
-void esp8266::accessPoint(){
-    Uart.print("AT+CWMODE=3");
-    Uart.print("\r");
-    Uart.print("\n");
-    printer->println("Sent At");
+void esp8266::accessPoint(String name){
+    uartSend("AT+CWMODE=3");
+    delay(1000);
+    //uartSend('AT+CWSAP="' + name + '","",1,0');
 }
 
 void esp8266::multipleConnections(){
-	Uart.print("AT+CIPMUX=1");
-    Uart.print("\r");
-    Uart.print("\n");
+	uartSend("AT+CIPMUX=1");
 }
 
 void esp8266::tcpServer(){
-	Uart.print("AT+CIPSERVER=1,8888");
-    Uart.print("\r");
-    Uart.print("\n");
+	uartSend("AT+CIPSERVER=1,8888");
 }
 void esp8266::availableData(){
 	if (Uart.available() > 0) {
@@ -47,14 +39,19 @@ void esp8266::availableData(){
 		
 
         if (Uart.find("+IPD")){
-        	String connection = (Uart.readString().substring(1,2));
-        	printer->println(connection);
-        	//String stack ="GET / HTTP/1.1 \nHost: 192.168.4.1:8888 \nAccept: */* \nAuthorization: Basic XXX \nAccept-Encoding: gzip, deflate\n\rHTTP/1.1 200 OK\nVary: Authorization,Accept\nTransfer-Encoding: chunked\nEtag: 'fa2ba873343ba638123b7671c8c09998'\nContent-Type: application/html; charset=utf-8\nDate: Wed, 01 Jun 2011 14:59:30 GMT\nServer: thin 1.2.11 codename Bat-Shit Crazy\nAllow: GET,OPTIONS,HEAD\nCache-Control: public,max-age=120\nConnection: close \n\r";
-        	String form = "<html xmlns='http://www.w3.org/1999/xhtml'><title>TheLemonBox</title><body><form method='POST' action='/'><input type='text' name='key'/><input type='submit' value='submit'/></form></body></html>\r\n\r\n";
 
-        	// String complete = stack + form;
-        	sendData(form, connection);
-        	printer->println(Uart.readString());
+	        if (Uart.find(":POST")){
+	        	printer->println("POST WAS FOUND:");
+	        }
+        	if(Uart.find(":GET")){
+	        	printer->println("GET WAS FOUND:");
+	        	String connection = (Uart.readString().substring(1,2));
+	        	printer->println(connection);
+	        	String form = "<html xmlns='http://www.w3.org/1999/xhtml'><title>TheLemonBox</title><body><form method='POST' action='/'><input type='text' name='key'/><input type='submit' value='submit'/></form></body></html>\r\n\r\n";
+
+	        	// String complete = stack + form;
+	        	sendData(form, connection);
+        	}
         }
 	}
 
@@ -62,15 +59,16 @@ void esp8266::availableData(){
 
 
 void esp8266::sendData(String data, String client){
-	Uart.print("AT+CIPSEND="+ client +","+ data.length());
-    Uart.print("\r");
-    Uart.print("\n");
-    Uart.print(data);
-    Uart.print("\r");
-    Uart.print("\n");
+	uartSend("AT+CIPSEND="+ client +","+ data.length());
+    uartSend(data);
 	delay(100);
-	Uart.print("AT+CIPCLOSE="+ client);
-    Uart.print("\r");
+	uartSend("AT+CIPCLOSE="+ client);
+
+}
+
+void esp8266::uartSend(String data){
+	Uart.print(data);
+	Uart.print("\r");
     Uart.print("\n");
 }
 

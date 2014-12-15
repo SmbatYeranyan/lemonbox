@@ -65,7 +65,7 @@ void loop() {
 
     if (inByte == 52){
     	//Serial.println("yolo");
-    	Esp.accessPoint();
+    	Esp.accessPoint("lemonBoxTrial");
     	delay(1000);
     	Esp.multipleConnections();
     	delay(1000);
