@@ -4,6 +4,7 @@
 #include "string.h"
 
 
+
 esp8266::esp8266(SoftwareSerial U, Print &print)
 {
 	Uart = U;
@@ -21,7 +22,7 @@ void esp8266::check(){
 
 
 void esp8266::accessPoint(String name){
-    uartSend("AT+CWMODE=3");
+    uartSend("AT+CWMODE=1");
     delay(1000);
     //uartSend('AT+CWSAP="' + name + '","",1,0');
 }
@@ -31,7 +32,7 @@ void esp8266::multipleConnections(){
 }
 
 void esp8266::tcpServer(){
-	uartSend("AT+CIPSERVER=1,8888");
+	uartSend("AT+CIPSERVER=1,80");
 }
 void esp8266::availableData(){
 	if (Uart.available() > 0) {
@@ -44,29 +45,35 @@ void esp8266::availableData(){
 		if (findString("IPD",find) != -1){
 	        printer->println("IPD WAS FOUND:");
 			if (findString(":GET",find) != -1){
-				int connection = find.indexOf(',');
-		        String client = find.substring(connection+1  ,connection + 2);
+				connection = find.indexOf(',');
+		         client = find.substring(connection + 1  ,connection + 2);
 
 				if (connection > 0){
-					printer->println(connection);
 					printer->println("found int: at: "+ client);
 				}
 				find ="";
 				memString="";
-	        	String form = "<html><title>TheLemonBox</title><body><form method='POST' action='/'><input type='text' name='key'/><input type='submit' value='submit'/></form></body></html>\r\n\r\n";
-		        	// String complete = stack + form;
-		        	Uart.print("AT+CIPSEND="+ client +","+ form.length());
-				    Uart.print("\r");
-				    Uart.print("\n");
-				    delay(1000);
-				    Uart.print(form);
-				    Uart.print("\r");
-				    Uart.print("\n");
-				    delay(1000);
-		        	Uart.print("AT+CIPCLOSE=" + client);
-				    Uart.print("\r");
-				    Uart.print("\n");
-		        	printer->println("GET WAS FOUND:");
+		
+				//String form = "";
+	        
+	        	Uart.print("AT+CIPSEND=" + client + "," + 155);
+			    Uart.print("\r");
+			    Uart.print("\n");
+			    
+			    Uart.print("<html><title>LemonBox</title>");
+			    Uart.print("<body>");
+			    Uart.print("<form method='POST' action='/'>");
+			    Uart.print("<input type='text' name='key'/><input type='submit' value='submit'/>");
+			    Uart.print("</form></body></html>");
+			    Uart.print("\r");
+			    Uart.print("\n");
+
+			    delay(2000);
+	        	Uart.print("AT+CIPCLOSE=" + client);
+			    Uart.print("\r");
+			    Uart.print("\n");
+			    delay(1000);
+	        	printer->println("GET WAS FOUND:");
 			}
 
 		}

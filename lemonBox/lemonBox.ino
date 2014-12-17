@@ -57,21 +57,29 @@ void loop() {
     }
 
     if (inByte == 51){
-	    Uart.print("AT");
-	    Uart.print("\r");
-	    Uart.print("\n");
+    	Esp.uartSend("AT+CIPCLOSE=0");
+    	delay(100);
+    	Esp.uartSend("AT+CIPCLOSE=1");
+    	delay(100);
+    	Esp.uartSend("AT+CIPCLOSE=2");
+    	delay(100);
+    	Esp.uartSend("AT+CIPCLOSE=3");
+    	delay(100);
+    	Esp.uartSend("AT+CIPCLOSE=4");
     	
+    	delay(100);
     }  
 
     if (inByte == 52){
     	//Serial.println("yolo");
-    	Esp.accessPoint("lemonBoxTrial");
+	  	Esp.accessPoint("lemonBoxTrial");
     	delay(1000);
+
     	Esp.multipleConnections();
     	delay(1000);
-    	Esp.tcpServer();
 
+    	Esp.tcpServer();
     }  
   }
-  Esp.availableData();
+Esp.availableData();
 }
