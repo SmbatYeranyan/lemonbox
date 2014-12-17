@@ -23,8 +23,10 @@ class esp8266
   	char inChar;
   	int inByte;
   	String memoryString;
+  	char finder[500];
   	bool stringComplete;
   	bool Contains(String s, String search);
+  	int findString(String s, String search);
   	Print* printer;
 };
 

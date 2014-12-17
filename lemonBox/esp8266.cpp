@@ -35,36 +35,58 @@ void esp8266::tcpServer(){
 }
 void esp8266::availableData(){
 	if (Uart.available() > 0) {
-		inByte = Uart.read();
-		inChar = (char)inByte;
-		memoryString = Uart.readString();
-		printer->println(memoryString);
+		String memString = Uart.readString();
+	/*	memString.replace('\n','=');
+		memString.replace('\r','=');*/
+		String find = memString.substring(0,25);
+					printer->println(memString);
 
-        if (Uart.find("+IPD")){
+		if (findString("IPD",find) != -1){
+	        printer->println("IPD WAS FOUND:");
+			if (findString(":GET",find) != -1){
+				int connection = find.indexOf(',');
+		        String client = find.substring(connection+1  ,connection + 2);
 
-	        if(strstr(":POST",memoryString)){
-	        	printer->println("POST WAS FOUND:");
-	        }
-        	if(strstr(":GET",memoryString)){
-	        	printer->println("GET WAS FOUND:");
-	        	String connection = (Uart.readString().substring(1,2));
-	        	printer->println(connection);
-	        	String form = "<html xmlns='http://www.w3.org/1999/xhtml'><title>TheLemonBox</title><body><form method='POST' action='/'><input type='text' name='key'/><input type='submit' value='submit'/></form></body></html>\r\n\r\n";
+				if (connection > 0){
+					printer->println(connection);
+					printer->println("found int: at: "+ client);
+				}
+				find ="";
+				memString="";
+	        	String form = "<html><title>TheLemonBox</title><body><form method='POST' action='/'><input type='text' name='key'/><input type='submit' value='submit'/></form></body></html>\r\n\r\n";
+		        	// String complete = stack + form;
+		        	Uart.print("AT+CIPSEND="+ client +","+ form.length());
+				    Uart.print("\r");
+				    Uart.print("\n");
+				    delay(1000);
+				    Uart.print(form);
+				    Uart.print("\r");
+				    Uart.print("\n");
+				    delay(1000);
+		        	Uart.print("AT+CIPCLOSE=" + client);
+				    Uart.print("\r");
+				    Uart.print("\n");
+		        	printer->println("GET WAS FOUND:");
+			}
 
-	        	// String complete = stack + form;
-	        	sendData(form, connection);
-        	}
-        }
+		}
+
+		
+		
+/*        if (Uart.find("+IPD")){
+
+        	
+        }*/
 	}
 
 }
 
 
 void esp8266::sendData(String data, String client){
-	uartSend("AT+CIPSEND="+ client +","+ data.length());
-    uartSend(data);
-	delay(100);
-	uartSend("AT+CIPCLOSE="+ client);
+
+	Uart.print("AT+CIPCLOSE="+ client);
+    Uart.print("\r");
+    Uart.print("\n");
 
 }
 
@@ -84,3 +106,14 @@ bool esp8266::Contains( String s, String search)
 	return false;  //or -1
 }
 
+
+int esp8266::findString(String needle, String haystack) {
+  int foundpos = -1;
+  for (int i = 0; (i < haystack.length() - needle.length()); i++) {
+    if (haystack.substring(i,needle.length()+i) == needle) {
+      foundpos = i;
+    }
+  }
+  return foundpos;
+}
+ 
