@@ -6,8 +6,8 @@
 #include <SoftwareSerial.h>
 #include "esp8266.h"
 SoftwareSerial Uart(10, 11);
-char inChar;
-int inByte;
+char inChar1;
+int inByte1;
 
 esp8266 Esp(Uart, Serial);
 
@@ -28,13 +28,13 @@ void loop() {
 
 
   if (Serial.available() > 0) {
-    inByte = Serial.read();    // read in character
-    inChar = (char)inByte;     // convert it to ASCII viewable
+    inByte1 = Serial.read();    // read in character
+    inChar1 = (char)inByte1;     // convert it to ASCII viewable
 /*    Serial.print(inByte);      // echo back values to both ports
     Serial.print(" ");
     Serial.print(inChar);
     Serial.print(" \n");*/
-    if (inByte == 49){
+    if (inByte1 == 49){
 /*	    Uart.write('A');
 	    Uart.write('T');
 	    Uart.write('+');
@@ -50,13 +50,13 @@ void loop() {
     	*/
     }
 
-    if (inByte == 50){
+    if (inByte1 == 50){
 /*	    Uart.print("AT+CWMODE?");
 	    Uart.print("\n");
     	*/
     }
 
-    if (inByte == 51){
+    if (inByte1 == 51){
     	Esp.uartSend("AT+CIPCLOSE=0");
     	delay(100);
     	Esp.uartSend("AT+CIPCLOSE=1");
@@ -70,7 +70,7 @@ void loop() {
     	delay(100);
     }  
 
-    if (inByte == 52){
+    if (inByte1 == 52){
     	//Serial.println("yolo");
 	  	Esp.accessPoint("lemonBoxTrial");
     	delay(1000);

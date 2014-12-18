@@ -2,8 +2,9 @@
 #ifndef esp8266_h
 #define esp8266_h
 #include <SoftwareSerial.h>
-#include "Arduino.h"
+#include <Arduino.h>
 extern SoftwareSerial Uart;  	
+
 
 class esp8266
 {
@@ -20,16 +21,16 @@ class esp8266
 
 
   private:
-  	char inChar;
-  	int inByte;
-  	String memoryString;
-  	char finder[500];
+    char inChar;
+    int inByte;
+    String memoryString;
+    char finder[500];
 
-  	bool stringComplete;
-  	bool Contains(String s, String search);
-  	int findString(String s, String search);
-  	int connection;
-	String client;
+    bool stringComplete;
+    bool Contains(String s, String search);
+    int findString(String s, String search);
+    int connection;
+    String client;
   	Print* printer;
 };
 
