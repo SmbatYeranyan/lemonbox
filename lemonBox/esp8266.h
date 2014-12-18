@@ -15,6 +15,7 @@ class esp8266
     void availableData();
     void accessPoint(String name);
     void uartSend(String data);
+    void sendStream(String data, String size);
     void sendData(String data, String client);
     void multipleConnections();
     void tcpServer();
@@ -23,14 +24,8 @@ class esp8266
   private:
     char inChar;
     int inByte;
-    String memoryString;
-    char finder[500];
-
-    bool stringComplete;
     bool Contains(String s, String search);
     int findString(String s, String search);
-    int connection;
-    String client;
   	Print* printer;
 };
 

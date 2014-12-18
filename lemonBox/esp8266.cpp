@@ -36,86 +36,127 @@ void esp8266::tcpServer(){
 char inData[20]; // Allocate some space for the string
 char inChar=-1; // Where to store the character read
 byte index = 0; // Index into array; where to store the character
-
+int chlID =0;
 void esp8266::availableData(){
+	String data = "";
 	if (Uart.available() > 0) {
-		
-    String memString = "Uart.readString();";
-	/*	memString.replace('\n','=');
-		memString.replace('\r','=');*/
-    inChar = Uart.read(); // Read a character
-    inData[index] = inChar; // Store it
-    index++; // Increment where to write next
-    inData[index] = '\0'; // Null terminate the string
-/*
 
-*/  
-    //String str(inData);
-    //printer->println(str);
-    //printer->println(inData);
-    String find = memString.substring(0,25);
-    printer->println(inData);
-		//printer->println(find.length());
-    if (Uart.find("+IPD")){
-
-      printer->println("IPD CHAR WAS FOUND:");
-      //printer->println(Uart.readString().substring(0,4));
-      if (Uart.find(":GET")){
-        
-        printer->println("GET WAS FOUND");
-        printer->println(inData);
-      }
-      
-    }
-    if (findString("IPD",find) != -1){
-          printer->println("IPD WAS FOUND:");
-			if (findString(":GET",find) != -1){
-				connection = find.indexOf(',');
-		         client = find.substring(connection + 1  ,connection + 2);
-
-				if (connection > 0){
-					printer->println("found int: at: "+ client);
+		unsigned long start;
+		start = millis();
+		char c0 = Uart.read();
+		if (c0 == '+')
+		{
+			
+			while (millis()-start<1000) 
+			{
+				if (Uart.available()>0)
+				{
+					char c = Uart.read();
+					data += c;
 				}
-				find ="";
-				memString="";
-		
-				//String form = "";
-	        
-	        	Uart.print("AT+CIPSEND=" + client + "," + 155);
-			    Uart.print("\r");
-			    Uart.print("\n");
-			    
-			    Uart.print("<html><title>LemonBox</title>");
-			    Uart.print("<body>");
-			    Uart.print("<form method='POST' action='/'>");
-			    Uart.print("<input type='text' name='key'/><input type='submit' value='submit'/>");
-			    Uart.print("</form></body></html>");
-			    Uart.print("\r");
-			    Uart.print("\n");
-
-			    delay(2000);
-	        	Uart.print("AT+CIPCLOSE=" + client);
-			    Uart.print("\r");
-			    Uart.print("\n");
-			    delay(1000);
-	        	printer->println("GET WAS FOUND:");
-
-
+				if (data.indexOf("\nOK")!=-1)
+				{
+					break;
+				}
 			}
+			
+			int sLen = strlen(data.c_str());
+			int i,j;
+			for (i = 0; i <= sLen; i++)
+			{
+				if (data[i] == ':')
+				{
+					break;
+				}
+				
+			}
+			boolean found = false;
+			for (j = 4; j <= i; j++)
+			{
+				if (data[j] == ',')
+				{
+					found = true;
+					break;
+				}
+				
+			}
+			int iSize;
+			printer->println(data);
+			
+			if(found ==true)
+			{
+				String _id = data.substring(4, j);
+				chlID = _id.toInt();
+			
+				printer->println(chlID);
 
+				if (findString("IPD,",data) != -1){
+
+					printer->println("IPD CHAR WAS FOUND:");
+					//printer->println(Uart.readString().substring(0,4));
+					if (findString(":GET",data) != -1){
+
+						if (findString("ssid=", data) != -1){
+							printer->println("SSID is found");
+							
+							}else{
+
+
+
+							Uart.print("AT+CIPSEND=" + _id + "," + 191);
+							Uart.print("\r");
+							Uart.print("\n");
+
+							Uart.print("<html><title>LemonBox</title>");
+							Uart.print("<body>");
+							Uart.print("<form method='GET' action='/'>");
+							Uart.print("<input type='text' name='ssid'/>");
+							Uart.print("<input type='text' name='password'/>");
+							Uart.print("<input type='submit' value='submit'/>");
+							Uart.print("</form></body></html>");
+							Uart.print("\r");
+							Uart.print("\n");
+
+							delay(1000);
+							Uart.print("AT+CIPCLOSE=" + _id);
+							Uart.print("\r");
+							Uart.print("\n");
+							delay(100);
+							printer->println("GET WAS FOUND:");
+						}
+					}
+					if (findString(":POST",data) != -1){
+
+						printer->println("POST WAS FOUND");
+						Uart.print("AT+CIPSEND=" + _id + "," + 2);
+						Uart.print("\r");
+						Uart.print("\n");
+
+						Uart.print("ok");
+						Uart.print("\r");
+						Uart.print("\n");
+
+						delay(1000);
+						Uart.print("AT+CIPCLOSE=" + _id);
+						Uart.print("\r");
+						Uart.print("\n");
+						delay(100);
+					}
+
+				}
+			
+	/*        if (Uart.find("+IPD")){
+
+	        	
+	        }*/
+			}
 		}
-
-		
-		
-/*        if (Uart.find("+IPD")){
-
-        	
-        }*/
 	}
-
 }
 
-
+void esp8266::sendStream(String data, String size){
+	
+}
 void esp8266::sendData(String data, String client){
 
 	Uart.print("AT+CIPCLOSE="+ client);
@@ -151,3 +192,4 @@ int esp8266::findString(String needle, String haystack) {
   return foundpos;
 }
  
+		
