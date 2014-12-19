@@ -19,7 +19,7 @@ class esp8266
     void sendData(String data, String client);
     void multipleConnections();
     void tcpServer();
-
+    String getValue(String data, char seperator, int index);
 
   private:
     char inChar;

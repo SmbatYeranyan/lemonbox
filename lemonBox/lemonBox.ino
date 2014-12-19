@@ -12,9 +12,10 @@ int inByte1;
 esp8266 Esp(Uart, Serial);
 
 void setup() {
+    Esp.sendStream("","");
   Serial.begin(9600);
   Uart.begin(9600);
- 
+    
 
 
 /*
