@@ -12,7 +12,7 @@ int inByte1;
 esp8266 Esp(Uart, Serial);
 
 void setup() {
-    Esp.sendStream("","");
+    
   Serial.begin(9600);
   Uart.begin(9600);
     
@@ -52,9 +52,8 @@ void loop() {
     }
 
     if (inByte1 == 50){
-/*	    Uart.print("AT+CWMODE?");
-	    Uart.print("\n");
-    	*/
+    	Esp.getNetowrkIP();
+
     }
 
     if (inByte1 == 51){

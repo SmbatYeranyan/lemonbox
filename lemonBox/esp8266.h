@@ -14,11 +14,16 @@ class esp8266
     void check();
     void availableData();
     void accessPoint(String name);
+    void joinAccessPoint(String ssid, String pass);
     void uartSend(String data);
-    void sendStream(String data, String size);
+    void closeMux(String id);
+    void replyOK(String id);
+    void onboarding(String id);
+    void sendStream(String data);
     void sendData(String data, String client);
     void multipleConnections();
     void tcpServer();
+    void getNetowrkIP();
     String getValue(String data, char seperator, int index);
 
   private:

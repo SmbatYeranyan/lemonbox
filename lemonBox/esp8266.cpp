@@ -21,8 +21,40 @@ void esp8266::check(){
 
 
 void esp8266::accessPoint(String name){
-    uartSend("AT+CWMODE=2");
+    uartSend("AT+CWMODE=3");
     delay(1000);
+    //uartSend('AT+CWSAP="' + name + '","",1,0');
+}
+String incoming;
+
+void esp8266::getNetowrkIP(){
+	Uart.print("AT+CIFSR=?");
+	Uart.print("\r");
+	Uart.print("\n");
+}
+void esp8266::joinAccessPoint(String ssid, String pass){
+    uartSend("AT+CWJAP='"+ ssid +"','"+pass+"'");
+    /*delay(5000);
+    Uart.print("AT+CIFSR=?");
+    Uart.print("\r");
+    Uart.print("\n");*/
+/*	unsigned long start;
+	start = millis();
+	char c0 = Uart.read();
+
+	while (millis()-start<2000) 
+	{
+		if (Uart.available()>0)
+		{
+			char c = Uart.read();
+			incoming += c;
+			printer->println(incoming);
+		}
+		if (incoming.indexOf("\nOK")!=-1)
+		{
+			break;
+		}
+	}*/
     //uartSend('AT+CWSAP="' + name + '","",1,0');
 }
 
@@ -47,7 +79,7 @@ void esp8266::availableData(){
 		if (c0 == '+')
 		{
 			
-			while (millis()-start<1000) 
+			while (millis()-start<3000) 
 			{
 				if (Uart.available()>0)
 				{
@@ -98,49 +130,33 @@ void esp8266::availableData(){
 
 						if (findString("ssid=", data) != -1){
 							printer->println("SSID is found");
+							String ssid =(getValue(getValue(getValue(data,'?',1),'&',0),'=',1));
+							String pass =(getValue(getValue(data,'?',1),'=',2));
+							printer->println(ssid+" " + pass);
+							printer->println(data);
+							joinAccessPoint(ssid,pass);
+							delay(2000);
+							replyOK(_id);
 							
-							}else{
 
 
-
-							Uart.print("AT+CIPSEND=" + _id + "," + 191);
-							Uart.print("\r");
-							Uart.print("\n");
-
-							Uart.print("<html><title>LemonBox</title>");
-							Uart.print("<body>");
-							Uart.print("<form method='GET' action='/'>");
-							Uart.print("<input type='text' name='ssid'/>");
-							Uart.print("<input type='text' name='password'/>");
-							Uart.print("<input type='submit' value='submit'/>");
-							Uart.print("</form></body></html>");
-							Uart.print("\r");
-							Uart.print("\n");
-
-							delay(1000);
-							Uart.print("AT+CIPCLOSE=" + _id);
-							Uart.print("\r");
-							Uart.print("\n");
+							while (millis()-start<3000) 
+							{
+								Uart.print("AT+CIPCLOSE=" + _id);
+			
+								Uart.print("\r");
+								Uart.print("\n");
+							}
 							delay(100);
-							printer->println("GET WAS FOUND:");
+						}else{
+
+							onboarding(_id);//onboarding
 						}
 					}
 					if (findString(":POST",data) != -1){
 
 						printer->println("POST WAS FOUND");
-						Uart.print("AT+CIPSEND=" + _id + "," + 2);
-						Uart.print("\r");
-						Uart.print("\n");
-
-						Uart.print("ok");
-						Uart.print("\r");
-						Uart.print("\n");
-
-						delay(1000);
-						Uart.print("AT+CIPCLOSE=" + _id);
-						Uart.print("\r");
-						Uart.print("\n");
-						delay(100);
+						replyOK(_id);
 					}
 
 				}
@@ -154,12 +170,90 @@ void esp8266::availableData(){
 	}
 }
 
-void esp8266::sendStream(String data, String size){
-	String split = "hi this is a split test";
-	String word3 = getValue(split, ' ', 2);
+void esp8266::replyOK(String id){
+	Uart.print("AT+CIPSEND=" + id + "," + 2);
+	Uart.print("\r");
+	Uart.print("\n");
+
+	Uart.print("ok");
+	Uart.print("\r");
+	Uart.print("\n");
+
+	delay(1000);
+	Uart.print("AT+CIPCLOSE=" + id);
+	Uart.print("\r");
+	Uart.print("\n");
+	delay(100);
 }
 
-String getValue(String data, char separator, int index)
+void esp8266::onboarding(String id){
+
+	String html;
+	html ="<html><head><title>LemonBox</title>";
+	html+="<style>body{text-align:center;background-color: rgb(53, 51, 50);}";
+	html+="form{display:inline-block}";
+	html+="form input{display:block}";
+	html+="</style></head><body>";
+	html+="<form method='GET' action='/'>";
+	html+="<input type='text' placeholder='SSID' name='ssid'/>";
+	html+="<input type='password' placeholder='PASSWORD' name='password'/>";
+	html+="<input type='submit' value='submit'/>";
+	html+="</form></body></html>";
+
+	Uart.print("AT+CIPSEND=" + id + "," + html.length());
+	Uart.print("\r");
+	Uart.print("\n");
+/*	Uart.print("<html><head><title>LemonBox</title>");
+	Uart.print("<style>body{text-align:center;}");
+	Uart.print("form{display:inline-block}");
+	Uart.print("form input{display:block}");
+	Uart.print("</style></head><body>");
+	Uart.print("<form method='GET' action='/'>");
+	Uart.print("<input type='text' placeholder='SSID' name='ssid'/>");
+	Uart.print("<input type='text' placeholder='PASSWORD' name='password'/>");
+	Uart.print("<input type='submit' value='submit'/>");
+	Uart.print("</form></body></html>");
+	Uart.print("\r");
+	Uart.print("\n");*/
+
+	unsigned long startMili;
+	startMili = millis();
+	bool foundWrite;
+	while (millis()-startMili<2000) {    
+		printer->println(Uart.readString());
+		                      
+        if(Uart.find(">")==true )
+        {
+			foundWrite = true;
+           break;
+        }
+     }
+	 if(foundWrite){
+		Uart.print(html);
+		delay(5000);
+		closeMux(id);
+	}
+
+	printer->println("GET WAS FOUND:");
+}
+
+void esp8266::closeMux(String id){
+	Uart.print("AT+CIPCLOSE=" + id);
+	Uart.print("\r");
+	Uart.print("\n");
+}
+void esp8266::sendStream(String data){
+	
+
+	for (int i = 0; i < data.length(); i++) { 
+		String line = getValue(data, '\r', i);
+		printer->println("line: "+line);
+ 
+	}
+
+}
+
+String esp8266::getValue(String data, char separator, int index)
 {
   int found = 0;
   int strIndex[] = {0, -1};
