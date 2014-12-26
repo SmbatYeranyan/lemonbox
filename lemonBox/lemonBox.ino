@@ -13,10 +13,10 @@ esp8266 Esp(Uart, Serial);
 
 void setup() {
     
-  Serial.begin(9600);
-  Uart.begin(9600);
+	Serial.begin(9600);
+	Uart.begin(9600);
     
-
+	pinMode(13, OUTPUT);           // set pin to input
 
 /*
   HWSERIAL.print("m"); // setup strings to initialize sensor
@@ -24,6 +24,7 @@ void setup() {
   HWSERIAL.print("q");  */
 }
 int looper=0;
+boolean on = false;
 void loop() {
 	/*Esp.availableData();*/
 
@@ -36,6 +37,15 @@ void loop() {
     Serial.print(inChar);
     Serial.print(" \n");*/
     if (inByte1 == 49){
+    	if (on == true){
+			digitalWrite(13, LOW); 
+			on= false;
+    	}else{
+
+			digitalWrite(13, HIGH); 
+			on= true;
+    		
+    	}
 /*	    Uart.write('A');
 	    Uart.write('T');
 	    Uart.write('+');
@@ -48,11 +58,15 @@ void loop() {
 	    Uart.write('=');
 	    Uart.write('1');
 	    Uart.write('\n\r');
+
     	*/
+
+    	Esp.getNetowrkIP();
     }
 
     if (inByte1 == 50){
-    	Esp.getNetowrkIP();
+    	//Esp.getNetowrkIP();
+    	Esp.joinAccessPoint("","");
 
     }
 
