@@ -1,0 +1,152 @@
+
+/*#include <SoftwareSerial.h>
+#include "esp8266.h"
+SoftwareSerial Uart(10, 11);
+char inChar;
+int inByte;
+
+esp8266 Esp(Uart, Serial);*/
+
+
+#define SSID       "ZakukashiServer"
+#define PASSWORD   "7946137410zaku"
+
+#include "uartWIFI.h"
+#include <SoftwareSerial.h>
+WIFI wifi;
+
+extern int chlID;	
+
+void setup() {
+Serial.begin(9600);
+if(!wifi.begin())
+  {
+  	DebugSerial.println("Begin error");
+  }
+  bool b = wifi.Initialize(STA, SSID, PASSWORD);
+  if(!b)
+  {
+    DebugSerial.println("Init error");
+  }
+  delay(8000);  //make sure the module can have enough time to get an IP address 
+  String ipstring  = wifi.showIP();
+  DebugSerial.println(ipstring);		//show the ip address of module
+  
+  delay(1000);
+  wifi.confMux(1);
+  delay(100);
+  if(wifi.confServer(1,80))
+	DebugSerial.println("Server is set up");
+	
+
+}
+
+void loop()
+{
+  
+  char buf[500];
+  int iLen = wifi.ReceiveMessage(buf);
+  if(iLen > 0)
+  {
+    
+      DebugSerial.print(buf);
+      Serial.println(buf)
+      delay(100);
+      
+      String cmd;
+      cmd = "HTTP/1.1 200 OK\r\n";
+      cmd += "Content-Type: text/html\r\n";
+      cmd += "Connection: close\r\n";
+      cmd += "Refresh: 8\r\n";
+      cmd += "\r\n";
+      cmd += "<!DOCTYPE HTML>\r\n";
+      cmd += "<html>\r\n";
+      for(int analogChannel = 0; analogChannel < 6; analogChannel++)
+      {
+        int sensorReading = analogRead(analogChannel);
+        cmd += "analog input ";
+        cmd += String(analogChannel);
+        cmd += " is ";
+        cmd += String(sensorReading);
+        cmd += "<br />\r\n";
+      
+      }     
+      cmd += "<html>\r\n";
+
+        wifi.Send(chlID,cmd);
+        delay(300);
+        wifi.closeMux(chlID);
+		delay(1000);
+  
+
+  }
+}
+
+
+
+  String memString = "Uart.readString();";
+    /*  memString.replace('\n','=');
+      memString.replace('\r','=');*/
+      inChar = Uart.read(); // Read a character
+      inData[index] = inChar; // Store it
+      index++; // Increment where to write next
+      inData[index] = '\0'; // Null terminate the string
+  /*
+
+  */  
+      //String str(inData);
+      //printer->println(str);
+      //printer->println(inData);
+      String find = memString.substring(0,25);
+      printer->println(inData);
+      //printer->println(find.length());
+      if (Uart.find("+IPD")){
+
+        printer->println("IPD CHAR WAS FOUND:");
+        //printer->println(Uart.readString().substring(0,4));
+        if (Uart.find(":GET")){
+          
+          printer->println("GET WAS FOUND");
+          printer->println(inData);
+        }
+        
+      }
+      if (findString("IPD",find) != -1){
+            printer->println("IPD WAS FOUND:");
+        if (findString(":GET",find) != -1){
+          connection = find.indexOf(',');
+               client = find.substring(connection + 1  ,connection + 2);
+
+          if (connection > 0){
+            printer->println("found int: at: "+ client);
+          }
+          find ="";
+          memString="";
+      
+          //String form = "";
+            
+              Uart.print("AT+CIPSEND=" + client + "," + 155);
+            Uart.print("\r");
+            Uart.print("\n");
+            
+            Uart.print("<html><title>LemonBox</title>");
+            Uart.print("<body>");
+            Uart.print("<form method='POST' action='/'>");
+            Uart.print("<input type='text' name='key'/><input type='submit' value='submit'/>");
+            Uart.print("</form></body></html>");
+            Uart.print("\r");
+            Uart.print("\n");
+
+            delay(2000);
+              Uart.print("AT+CIPCLOSE=" + client);
+            Uart.print("\r");
+            Uart.print("\n");
+            delay(1000);
+              printer->println("GET WAS FOUND:");
+
+
+        }
+
+      }
+
+      

@@ -7,6 +7,7 @@
 esp8266::esp8266(SoftwareSerial U, Print &print)
 {
 	Uart = U;
+	Serial.begin(9600);
 	printer = &print;
  	init();
 }
@@ -161,10 +162,10 @@ void esp8266::availableData(){
 					}
 					if (findString(":POST",data) != -1){
 						if (findString("/on", data) != -1){
-							digitalWrite(13, HIGH); 
+							digitalWrite(20, HIGH); 
 						}						
 						if (findString("/off", data) != -1){
-							digitalWrite(13, LOW); 
+							digitalWrite(20, LOW); 
 						}
 						printer->println("POST WAS FOUND");
 						reply(_id, "ok");

@@ -1,0 +1,14 @@
+{
+  "name": "LemonBox",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "nedb": "^1.0.1",
+    "express": "^4.10.6",
+    "compression": "^1.2.2",
+    "body-parser": "^1.10.0"
+  }
+}

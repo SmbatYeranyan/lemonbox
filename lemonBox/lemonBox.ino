@@ -5,7 +5,7 @@
 // 6/7/2014  not working yet
 #include <SoftwareSerial.h>
 #include "esp8266.h"
-SoftwareSerial Uart(10, 11);
+SoftwareSerial Uart(7, 8);
 char inChar1;
 int inByte1;
 
@@ -13,11 +13,13 @@ esp8266 Esp(Uart, Serial);
 
 void setup() {
     
-	Serial.begin(9600);
 	Uart.begin(9600);
     
 	pinMode(13, OUTPUT);           // set pin to input
-
+	pinMode(20, OUTPUT);           // set pin to input
+	pinMode(18, INPUT);           // set pin to input
+	digitalWrite(20, HIGH);
+		Serial.write("Starting....");
 /*
   HWSERIAL.print("m"); // setup strings to initialize sensor
   HWSERIAL.print("g 1\n");  
@@ -27,6 +29,9 @@ int looper=0;
 boolean on = false;
 void loop() {
 	/*Esp.availableData();*/
+	if (digitalRead(18)){
+		
+	}
 
 
   if (Serial.available() > 0) {
@@ -39,10 +44,12 @@ void loop() {
     if (inByte1 == 49){
     	if (on == true){
 			digitalWrite(13, LOW); 
+			digitalWrite(20, LOW); 
 			on= false;
     	}else{
 
 			digitalWrite(13, HIGH); 
+			digitalWrite(20, HIGH); 
 			on= true;
     		
     	}
