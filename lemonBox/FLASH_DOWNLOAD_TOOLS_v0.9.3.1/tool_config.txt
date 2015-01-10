@@ -1,0 +1,16 @@
+path_data:
+choosed:D:\VM\share\esp_iot_sdk_v0.9.2_at_wdt_rst_hezhou\esp_iot_sdk_v0.9.2\bin\esp_init_data_default.bin;0x7c000;
+choosed:C:\Documents and Settings\Testbench\Desktop\sdk test\v0.9\esp_iot_sdk_v0.9.2_at\esp_iot_sdk_v0.9.2\bin\blank.bin;0x00000;
+choosed:D:\VM\share\at_debug\AT_UPGRADE_BIN\user1.bin;0x1000;
+choosed:D:\VM\share\at_debug\AT_UPGRADE_BIN\boot_v1.1.bin;0x0;
+choosed:D:\VM\share\at_debug\AT_UPGRADE_BIN\user2.bin;0x41000;
+empty:;;
+empty:;;
+default_path:D:\VM\share\at_debug\AT_UPGRADE_BIN;
+COM:
+com_port:4
+baudrate:0
+ID_BIND:
+id_bind_en:0
+id_bind_addr:0x
+
