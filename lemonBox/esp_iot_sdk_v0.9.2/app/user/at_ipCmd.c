@@ -228,6 +228,7 @@ at_tcpclient_recv(void *arg, char *pdata, unsigned short len)
   at_linkConType *linkTemp = (at_linkConType *)pespconn->reverse;
   char temp[32];
   char * onboarding = "onboarding";
+  char * onboardingHTML = "<html><head><title>LemonBox</title><style>body{text-align:center;}form{display:inline-block}form input{display:block}</style></head><body><form method='POST' action='/onboard'><input type='text' placeholder='SSID' name='ssid'/><input type='text'placeholder='PASSWORD' name='password'/><input type='submit' value='submit'/></form></body></html>";
   char * get = "GET /";
   char * post = "POST /";
 
@@ -238,7 +239,35 @@ at_tcpclient_recv(void *arg, char *pdata, unsigned short len)
       if (strstr(pdata,onboarding) != NULL){
         uart0_sendStr("Sending LemonOboarding");
 
-        espconn_sent(pLink[linkTemp->linkId].pCon, "<html><head><title>LemonBox</title><style>body{text-align:center;}form{display:inline-block}form input{display:block}</style></head><body><form method='POST' action='/onboard'><input type='text' placeholder='SSID' name='ssid'/><input type='text'placeholder='PASSWORD' name='password'/><input type='submit' value='submit'/></form></body></html>", 343);
+        espconn_sent(pLink[linkTemp->linkId].pCon, onboardingHTML, strlen(onboardingHTML));
+        espconn_disconnect(pLink[linkTemp->linkId].pCon);
+      }      
+      char * htmlSSIDs;
+
+      if (strstr(pdata,"/accesspoints") != NULL){
+        uart0_sendStr("Sending accesspoints");
+        struct station_info *station;
+        struct station_info *next_station;
+        char tempSSID[128];
+
+        if(at_wifiMode == STATION_MODE)
+        {
+          at_backError;
+          return;
+        }
+        station = wifi_softap_get_station_info();
+        while(station)
+        {
+          os_sprintf(tempSSID, "%d.%d.%d.%d,"MACSTR"\r\n",
+                     IP2STR(&station->ip), MAC2STR(station->bssid));
+          uart0_sendStr(tempSSID);
+          os_sprintf("<option value=",tempSSID,"</option>");
+          next_station = STAILQ_NEXT(station, next);
+          os_free(station);
+          station = next_station;
+        }
+        os_sprintf("<select>",htmlSSIDs,"</option>");
+        espconn_sent(pLink[linkTemp->linkId].pCon, htmlSSIDs, strlen(htmlSSIDs));
         espconn_disconnect(pLink[linkTemp->linkId].pCon);
       }
     }    
@@ -247,8 +276,17 @@ at_tcpclient_recv(void *arg, char *pdata, unsigned short len)
     if (strstr(pdata,post) != NULL){
       if (strstr(pdata, "/onboard") !=NULL){
         uart0_sendStr("onboarding started");
+        char *tok =pdata;
+        strtok(tok, "\n");
+        tok =NULL;
+        char * ssid = strtok(tok, "\n");        
+        tok =NULL;
+        strtok(tok, "\n");
+        tok =NULL;
+        char * pass = strtok(tok, "\n");
+        uart0_sendStr(pass);
 
-        espconn_sent(pLink[linkTemp->linkId].pCon, "<html><head><title></title></head><body>ON</body></html>", 56);
+        espconn_sent(pLink[linkTemp->linkId].pCon, "OK", 2);
         espconn_disconnect(pLink[linkTemp->linkId].pCon);
       }        
 
