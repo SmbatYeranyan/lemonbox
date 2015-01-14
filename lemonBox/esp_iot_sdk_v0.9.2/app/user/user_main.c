@@ -10,6 +10,6 @@ void user_init(void)
   uart_init(BIT_RATE_115200, BIT_RATE_115200);
   at_wifiMode = wifi_get_opmode();
   os_printf("\r\nready!!!\r\n");
-  uart0_sendStr("\r\nready LOL vs5\r\n");
+  uart0_sendStr("\r\nready LOL vs8\r\n");
   at_init();
 }

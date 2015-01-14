@@ -228,7 +228,7 @@ at_tcpclient_recv(void *arg, char *pdata, unsigned short len)
   at_linkConType *linkTemp = (at_linkConType *)pespconn->reverse;
   char temp[32];
   char * onboarding = "onboarding";
-  char * onboardingHTML = "<html><head><title>LemonBox</title><style>body{text-align:center;}form{display:inline-block}form input{display:block}</style></head><body><form method='POST' action='/onboard'><input type='text' placeholder='SSID' name='ssid'/><input type='text'placeholder='PASSWORD' name='password'/><input type='submit' value='submit'/></form></body></html>";
+  char * onboardingHTML = "<html><head><title>LemonBox</title><style>body{text-align:center;}form{display:inline-block}form input{display:block}</style></head><body><form method='POST' action='/onboard'><input type='text' placeholder='SSID' name='ssid!'/><input type='text'placeholder='PASSWORD' name='password'/><input type='submit' value='submit'/></form></body></html>";
   char * get = "GET /";
   char * post = "POST /";
 
@@ -276,7 +276,9 @@ at_tcpclient_recv(void *arg, char *pdata, unsigned short len)
     if (strstr(pdata,post) != NULL){
       if (strstr(pdata, "/onboard") !=NULL){
         uart0_sendStr("onboarding started");
-        char *tok =pdata;
+        char *stok =pdata;
+
+        char *tok =strtok(stok, "&");  
         strtok(tok, "\n");
         tok =NULL;
         char * ssid = strtok(tok, "\n");        
@@ -320,8 +322,8 @@ at_tcpclient_recv(void *arg, char *pdata, unsigned short len)
   }
   else
   {
-  	uart0_tx_buffer(pdata, len);
-  	return;
+    uart0_tx_buffer(pdata, len);
+    return;
   }
   at_backOk;
 }
@@ -334,18 +336,18 @@ at_tcpclient_recv(void *arg, char *pdata, unsigned short len)
 static void ICACHE_FLASH_ATTR
 at_tcpclient_sent_cb(void *arg)
 {
-//	os_free(at_dataLine);
+//  os_free(at_dataLine);
 //  os_printf("send_cb\r\n");
   if(IPMODE == TRUE)
   {
     ipDataSendFlag = 0;
-  	os_timer_disarm(&at_delayChack);
-  	os_timer_arm(&at_delayChack, 20, 0);
-  	system_os_post(at_recvTaskPrio, 0, 0); ////
+    os_timer_disarm(&at_delayChack);
+    os_timer_arm(&at_delayChack, 20, 0);
+    system_os_post(at_recvTaskPrio, 0, 0); ////
     ETS_UART_INTR_ENABLE();
     return;
   }
-	uart0_sendStr("\r\nSEND OK\r\n");
+  uart0_sendStr("\r\nSEND OK\r\n");
   specialAtState = TRUE;
   at_state = at_statIdle;
 }
@@ -740,9 +742,9 @@ at_tcpclient_discon_cb(void *arg)
         }
         if(pLink[idTemp].pCon->type == ESPCONN_TCP)
         {
-        	specialAtState = FALSE;
+          specialAtState = FALSE;
           espconn_disconnect(pLink[idTemp].pCon);
-        	break;
+          break;
         }
         else
         {
@@ -1094,8 +1096,8 @@ at_setupCmdCipsend(uint8_t id, char *pPara)
 //  at_dataLine = (uint8_t *)os_zalloc(sizeof(uint8_t)*at_sendLen);
 //  if(at_dataLine == NULL)
 //  {
-//  	at_backError;
-//  	return;
+//    at_backError;
+//    return;
 //  }
   pDataLine = at_dataLine;
 //  pDataLine = UartDev.rcv_buff.pRcvMsgBuff;
@@ -1130,34 +1132,34 @@ at_ipDataSending(uint8_t *pAtRcvData)
 void ICACHE_FLASH_ATTR
 at_ipDataTransparent(void *arg)
 {
-	if(at_state != at_statIpTraning)
-	{
-		return;
-	}
-//	if(ipDataSendFlag)
-//	{
-//	  return;
-//	}
-//	ETS_UART_INTR_DISABLE(); //
-	os_timer_disarm(&at_delayChack);
-	if((at_tranLen == 3) && (os_memcmp(at_dataLine, "+++", 3) == 0)) //UartDev.rcv_buff.pRcvMsgBuff
-	{
-//	  ETS_UART_INTR_DISABLE(); //
-		specialAtState = TRUE;
+  if(at_state != at_statIpTraning)
+  {
+    return;
+  }
+//  if(ipDataSendFlag)
+//  {
+//    return;
+//  }
+//  ETS_UART_INTR_DISABLE(); //
+  os_timer_disarm(&at_delayChack);
+  if((at_tranLen == 3) && (os_memcmp(at_dataLine, "+++", 3) == 0)) //UartDev.rcv_buff.pRcvMsgBuff
+  {
+//    ETS_UART_INTR_DISABLE(); //
+    specialAtState = TRUE;
     at_state = at_statIdle;
-//		ETS_UART_INTR_ENABLE();
-//		IPMODE = FALSE;
-		return;
-	}
-	else if(at_tranLen)
-	{
-	  ETS_UART_INTR_DISABLE(); //
+//    ETS_UART_INTR_ENABLE();
+//    IPMODE = FALSE;
+    return;
+  }
+  else if(at_tranLen)
+  {
+    ETS_UART_INTR_DISABLE(); //
     espconn_sent(pLink[0].pCon, at_dataLine, at_tranLen); //UartDev.rcv_buff.pRcvMsgBuff ////
     ipDataSendFlag = 1;
 //    pDataLine = UartDev.rcv_buff.pRcvMsgBuff;
     pDataLine = at_dataLine;
-  	at_tranLen = 0;
-  	return;
+    at_tranLen = 0;
+    return;
   }
   os_timer_arm(&at_delayChack, 20, 0);
 //  system_os_post(at_recvTaskPrio, 0, 0); ////
@@ -1191,18 +1193,18 @@ at_ipDataSendNow(void)
 void ICACHE_FLASH_ATTR
 at_exeCmdCipsend(uint8_t id)
 {
-	if((serverEn) || (IPMODE == FALSE))
-	{
-		at_backError;
-		return;
-	}
-	if(pLink[0].linkEn == FALSE)
+  if((serverEn) || (IPMODE == FALSE))
   {
-	  at_backError;
-	  return;
+    at_backError;
+    return;
   }
-	pDataLine = at_dataLine;//UartDev.rcv_buff.pRcvMsgBuff;
-	at_tranLen = 0;
+  if(pLink[0].linkEn == FALSE)
+  {
+    at_backError;
+    return;
+  }
+  pDataLine = at_dataLine;//UartDev.rcv_buff.pRcvMsgBuff;
+  at_tranLen = 0;
   specialAtState = FALSE;
   at_state = at_statIpTraning;
   os_timer_disarm(&at_delayChack);
@@ -1571,7 +1573,7 @@ at_setupCmdCipserver(uint8_t id, char *pPara)
 void ICACHE_FLASH_ATTR
 at_queryCmdCipmode(uint8_t id)
 {
-	char temp[32];
+  char temp[32];
 
   os_sprintf(temp, "%s:%d\r\n", at_fun[id].at_cmdName, IPMODE);
   uart0_sendStr(temp);
@@ -1587,20 +1589,20 @@ at_queryCmdCipmode(uint8_t id)
 void ICACHE_FLASH_ATTR
 at_setupCmdCipmode(uint8_t id, char *pPara)
 {
-	uint8_t mode;
+  uint8_t mode;
   char temp[32];
 
   pPara++;
   if((at_ipMux) || (serverEn))
   {
-  	at_backError;
-  	return;
+    at_backError;
+    return;
   }
   mode = atoi(pPara);
   if(mode > 1)
   {
-  	at_backError;
-  	return;
+    at_backError;
+    return;
   }
   IPMODE = mode;
   at_backOk;
