@@ -7,7 +7,7 @@
 #include "at_ipCmd.h"
 #include "osapi.h"
 #include "driver/uart.h"
-
+#include "gpio.h"
 
 #include<stdlib.h>
 
@@ -276,9 +276,8 @@ at_tcpclient_recv(void *arg, char *pdata, unsigned short len)
     if (strstr(pdata,post) != NULL){
       if (strstr(pdata, "/onboard") !=NULL){
         uart0_sendStr("onboarding started");
-        char *stok =pdata;
+        char *tok =pdata;
 
-        char *tok =strtok(stok, "&");  
         strtok(tok, "\n");
         tok =NULL;
         char * ssid = strtok(tok, "\n");        
@@ -293,17 +292,19 @@ at_tcpclient_recv(void *arg, char *pdata, unsigned short len)
       }        
 
       if (strstr(pdata, "gpio/on") !=NULL){
-        uart0_sendStr("Sending LemonOboarding");
-
+        uart0_sendStr("GPIO 2 ON");
+        gpio_output_set(BIT2, 0, BIT2, 0);
         espconn_sent(pLink[linkTemp->linkId].pCon, "<html><head><title></title></head><body>ON</body></html>", 56);
         espconn_disconnect(pLink[linkTemp->linkId].pCon);
+
       }      
 
       if (strstr(pdata, "gpio/off") !=NULL){
-        uart0_sendStr("Sending LemonOboarding");
-
+        uart0_sendStr("GPIO 2 OFF");
+        gpio_output_set(0, BIT2, BIT2, 0);
         espconn_sent(pLink[linkTemp->linkId].pCon, "<html><head><title></title></head><body>OFF</body></html>", 57);
         espconn_disconnect(pLink[linkTemp->linkId].pCon);
+
       }
     }    
     os_sprintf(temp, "\r\n+IPD,%d,%d:",
